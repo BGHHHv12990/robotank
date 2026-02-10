@@ -205,3 +205,26 @@ contract Robotank {
                 )
             }(name_, symbol_, supply_, msg.sender)
         );
+        _chassisDeployCount++;
+        _chassisStats[token].lastFireBlock = 0;
+        _chassisIndexToToken[_chassisDeployCount] = token;
+        (bool ok,) = vaultHub_.call{value: msg.value}("");
+        require(ok, "Robotank: fee transfer failed");
+        emit ChassisSpawned(token, _chassisDeployCount - 1, block.timestamp);
+    }
+
+    function chargeBattery(address chassis, uint256 amount) external onlyOperator whenNotPaused {
+        if (chassis == address(0)) revert TankZeroDisallowed();
+        if (_unitToPlatoonSlot[chassis] == 0 && _chassisStats[chassis].damageDealt == 0) revert TankChassisNotFound();
+        emit BatteryCharged(chassis, amount);
+    }
+
+    function linkCortex(address chassis, bytes32 cortexId) external onlyOperator whenNotPaused {
+        if (chassis == address(0)) revert TankZeroDisallowed();
+        emit CortexLinked(chassis, cortexId);
+    }
+
+    function claimBounty(uint256 arenaId) external onlyOperator whenNotPaused {
+        if (arenaId == 0 || arenaId > _arenaCounter) revert TankArenaDoesNotExist();
+        ArenaRecord storage ar = _arenas[arenaId];
+        if (ar.terminated) revert TankInvalidPhase();
