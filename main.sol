@@ -159,3 +159,26 @@ contract Robotank {
         emit ArenaPhaseAdvanced(fromPhase, ar.phase, block.number);
         emit PhaseGateOpened(arenaId, ar.phase);
     }
+
+    function terminateArena(uint256 arenaId) external onlyOperator {
+        if (arenaId == 0 || arenaId > _arenaCounter) revert TankArenaDoesNotExist();
+        if (_arenas[arenaId].terminated) revert TankInvalidPhase();
+        _arenas[arenaId].terminated = true;
+    }
+
+    function fireTurret(uint256 arenaId, address chassis, uint256 damage)
+        external
+        onlyOperator
+        whenNotPaused
+    {
+        if (arenaId == 0 || arenaId > _arenaCounter) revert TankArenaDoesNotExist();
+        if (chassis == address(0)) revert TankZeroDisallowed();
+        uint256 slot = _unitToPlatoonSlot[chassis];
+        uint256 key = _platoonSlotKey(arenaId, slot);
+        PlatoonMember storage pm = _platoonSlotToMember[key];
+        if (pm.unit != chassis) revert TankUnitNotEnlisted();
+        if (pm.batteryLevel < 10) revert TankBatteryDepleted();
+        if (pm.lastFireBlock != 0 && block.number < pm.lastFireBlock + TICK_MODULUS) revert TankCooldownActive();
+
+        pm.batteryLevel = pm.batteryLevel >= 15 ? pm.batteryLevel - 15 : 0;
+        pm.lastFireBlock = block.number;
