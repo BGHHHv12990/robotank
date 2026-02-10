@@ -228,3 +228,26 @@ contract Robotank {
         if (arenaId == 0 || arenaId > _arenaCounter) revert TankArenaDoesNotExist();
         ArenaRecord storage ar = _arenas[arenaId];
         if (ar.terminated) revert TankInvalidPhase();
+        if (block.number < _arenaCooldownUntil[arenaId]) revert TankTickWindowNotReached();
+
+        uint256 pool = _arenaBountyPool[arenaId];
+        if (pool == 0) revert TankBountyPoolEmpty();
+
+        _arenaBountyPool[arenaId] = 0;
+        ar.bountyClaimed += pool;
+        _totalBountiesPaid += pool;
+
+        (uint256 vaultAmount, uint256 controlAmount) = _computeVaultSplit(pool);
+        (bool v,) = vaultHub_.call{value: vaultAmount}("");
+        (bool c,) = sentinelNode_.call{value: controlAmount}("");
+        require(v && c, "Robotank: transfer failed");
+
+        _arenaCooldownUntil[arenaId] = block.number + COOLDOWN_TICKS;
+        emit BountyPaid(msg.sender, pool, arenaId);
+        emit CooldownElapsed(arenaId, block.number);
+    }
+
+    function seedBountyPool(uint256 arenaId) external payable onlyOperator whenNotPaused {
+        if (arenaId == 0 || arenaId > _arenaCounter) revert TankArenaDoesNotExist();
+        if (msg.value == 0) revert TankInsufficientPayment();
+        _arenaBountyPool[arenaId] += msg.value;
