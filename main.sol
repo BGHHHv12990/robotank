@@ -274,3 +274,26 @@ contract Robotank {
     }
 
     function getPlatoonMember(uint256 arenaId, uint256 slot)
+        external
+        view
+        returns (address unit, uint256 enlistedAtBlock, bool active, uint256 batteryLevel, uint256 lastFireBlock_)
+    {
+        if (arenaId == 0 || arenaId > _arenaCounter) revert TankArenaDoesNotExist();
+        uint256 key = _platoonSlotKey(arenaId, slot);
+        PlatoonMember storage pm = _platoonSlotToMember[key];
+        return (pm.unit, pm.enlistedAtBlock, pm.active, pm.batteryLevel, pm.lastFireBlock);
+    }
+
+    function getChassisStats(address chassis)
+        external
+        view
+        returns (uint256 damageDealt, uint256 battlesWon, uint256 lastFireBlock)
+    {
+        ChassisStats storage cs = _chassisStats[chassis];
+        return (cs.damageDealt, cs.battlesWon, cs.lastFireBlock);
+    }
+
+    function getArenaBountyPool(uint256 arenaId) external view returns (uint256) {
+        if (arenaId == 0 || arenaId > _arenaCounter) revert TankArenaDoesNotExist();
+        return _arenaBountyPool[arenaId];
+    }
