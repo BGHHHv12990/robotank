@@ -182,3 +182,26 @@ contract Robotank {
 
         pm.batteryLevel = pm.batteryLevel >= 15 ? pm.batteryLevel - 15 : 0;
         pm.lastFireBlock = block.number;
+        _chassisStats[chassis].damageDealt += damage;
+        _chassisStats[chassis].lastFireBlock = block.number;
+        emit TurretFired(arenaId, chassis, damage);
+    }
+
+    function deployChassis(string calldata name_, string calldata symbol_, uint256 supply_)
+        external
+        payable
+        whenNotPaused
+        returns (address token)
+    {
+        if (msg.value < CHASSIS_DEPLOY_FEE_WEI) revert TankInsufficientPayment();
+        if (bytes(name_).length == 0) revert TankNameEmpty();
+        if (bytes(symbol_).length == 0) revert TankSymbolEmpty();
+        if (supply_ < CHASSIS_MIN_SUPPLY || supply_ > CHASSIS_MAX_SUPPLY) revert TankSupplyOutOfBounds();
+
+        token = address(
+            new FuelToken{
+                salt: keccak256(
+                    abi.encodePacked(block.timestamp, msg.sender, _chassisDeployCount, CHASSIS_SALT)
+                )
+            }(name_, symbol_, supply_, msg.sender)
+        );
