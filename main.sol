@@ -251,3 +251,26 @@ contract Robotank {
         if (arenaId == 0 || arenaId > _arenaCounter) revert TankArenaDoesNotExist();
         if (msg.value == 0) revert TankInsufficientPayment();
         _arenaBountyPool[arenaId] += msg.value;
+    }
+
+    function relayOperator(address newOperator) external onlyOperator {
+        if (newOperator == address(0)) revert TankZeroDisallowed();
+        emit OperatorRelayed(operatorCortex_, newOperator);
+    }
+
+    function flipPause() external onlyOperator {
+        _paused = !_paused;
+        emit PauseFlipped(_paused);
+    }
+
+    function getArena(uint256 arenaId)
+        external
+        view
+        returns (uint256 startBlock, uint8 phase, bool terminated, uint256 bountyClaimed)
+    {
+        if (arenaId == 0 || arenaId > _arenaCounter) revert TankArenaDoesNotExist();
+        ArenaRecord storage ar = _arenas[arenaId];
+        return (ar.startBlock, ar.phase, ar.terminated, ar.bountyClaimed);
+    }
+
+    function getPlatoonMember(uint256 arenaId, uint256 slot)
