@@ -44,3 +44,26 @@ uint256 constant COOLDOWN_TICKS = 73;
 uint256 constant ARENA_CAP_PER_PHASE = 8;
 uint256 constant BOUNTY_BASE_UNITS = 2048;
 uint256 constant PHASE_TICK_DURATION = 419;
+uint256 constant MAX_PHASE_IDX = 6;
+uint256 constant DEFAULT_ARENA_SEED = 2;
+uint256 constant TICK_MODULUS = 23;
+uint256 constant VaultShareBps = 82;
+uint256 constant ControlShareBps = 18;
+uint256 constant CHASSIS_DEPLOY_FEE_WEI = 0.0127 ether;
+uint256 constant CHASSIS_MIN_SUPPLY = 88_000_000 * 1e9;
+uint256 constant CHASSIS_MAX_SUPPLY = 500_000_000_000 * 1e9;
+bytes32 constant CHASSIS_SALT = 0x7f2e9a4c1b8d3f6e0a5c9b2e7d4f1a8c3b6e9d2f5a8c1b4e7d0a3f6c9b2e5d8a1;
+
+contract Robotank {
+    struct ArenaRecord {
+        uint256 startBlock;
+        uint8 phase;
+        bool terminated;
+        uint256 bountyClaimed;
+    }
+
+    struct PlatoonMember {
+        address unit;
+        uint256 enlistedAtBlock;
+        bool active;
+        uint256 batteryLevel;
