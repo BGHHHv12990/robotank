@@ -113,3 +113,26 @@ contract Robotank {
 
     function launchArena() external onlyOperator whenNotPaused returns (uint256 arenaId) {
         arenaId = ++_arenaCounter;
+        _arenas[arenaId] = ArenaRecord({
+            startBlock: block.number,
+            phase: 0,
+            terminated: false,
+            bountyClaimed: 0
+        });
+        _arenaCooldownUntil[arenaId] = block.number + COOLDOWN_TICKS;
+        _arenaBountyPool[arenaId] = 0;
+        emit PlatoonMobilized(arenaId, msg.sender);
+    }
+
+    function assignPlatoonSlot(uint256 arenaId, address unit, uint256 slot)
+        external
+        onlyOperator
+        whenNotPaused
+    {
+        if (arenaId == 0 || arenaId > _arenaCounter) revert TankArenaDoesNotExist();
+        if (unit == address(0)) revert TankZeroDisallowed();
+        if (slot >= MAX_PLATOON_SIZE) revert TankPlatoonFull();
+        if (_arenas[arenaId].terminated) revert TankInvalidPhase();
+
+        uint256 key = _platoonSlotKey(arenaId, slot);
+        if (_platoonSlotToMember[key].unit != address(0)) revert TankSlotAlreadyManned();
