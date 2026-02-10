@@ -320,3 +320,26 @@ contract Robotank {
     }
 
     function chassisTokenAt(uint256 index) external view returns (address) {
+        if (index == 0 || index > _chassisDeployCount) revert TankInvalidArenaId();
+        return _chassisIndexToToken[index];
+    }
+
+    function canClaimBounty(uint256 arenaId) external view returns (bool) {
+        if (arenaId == 0 || arenaId > _arenaCounter) return false;
+        if (_arenas[arenaId].terminated) return false;
+        if (block.number < _arenaCooldownUntil[arenaId]) return false;
+        return _arenaBountyPool[arenaId] > 0;
+    }
+
+    function getArenaPhaseLabel(uint256 arenaId) external view returns (string memory) {
+        if (arenaId == 0 || arenaId > _arenaCounter) revert TankArenaDoesNotExist();
+        uint8 p = _arenas[arenaId].phase;
+        if (p == 0) return "Idle";
+        if (p == 1) return "Warmup";
+        if (p == 2) return "Engaged";
+        if (p == 3) return "Peak";
+        if (p == 4) return "Closure";
+        if (p == 5) return "Settle";
+        return "Terminal";
+    }
+
