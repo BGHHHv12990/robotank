@@ -136,3 +136,26 @@ contract Robotank {
 
         uint256 key = _platoonSlotKey(arenaId, slot);
         if (_platoonSlotToMember[key].unit != address(0)) revert TankSlotAlreadyManned();
+
+        _platoonSlotToMember[key] = PlatoonMember({
+            unit: unit,
+            enlistedAtBlock: block.number,
+            active: true,
+            batteryLevel: 100,
+            lastFireBlock: 0
+        });
+        _unitToPlatoonSlot[unit] = slot;
+        emit PlatoonSlotFilled(unit, slot);
+    }
+
+    function advanceArenaPhase(uint256 arenaId) external onlyOperator whenNotPaused {
+        if (arenaId == 0 || arenaId > _arenaCounter) revert TankArenaDoesNotExist();
+        ArenaRecord storage ar = _arenas[arenaId];
+        if (ar.terminated) revert TankArenaPaused();
+        if (ar.phase >= MAX_PHASE_IDX) revert TankInvalidPhase();
+
+        uint8 fromPhase = ar.phase;
+        ar.phase = fromPhase + 1;
+        emit ArenaPhaseAdvanced(fromPhase, ar.phase, block.number);
+        emit PhaseGateOpened(arenaId, ar.phase);
+    }
