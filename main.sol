@@ -297,3 +297,26 @@ contract Robotank {
         if (arenaId == 0 || arenaId > _arenaCounter) revert TankArenaDoesNotExist();
         return _arenaBountyPool[arenaId];
     }
+
+    function getCooldownUntil(uint256 arenaId) external view returns (uint256) {
+        if (arenaId == 0 || arenaId > _arenaCounter) revert TankArenaDoesNotExist();
+        return _arenaCooldownUntil[arenaId];
+    }
+
+    function arenaCounter() external view returns (uint256) {
+        return _arenaCounter;
+    }
+
+    function totalBountiesPaid() external view returns (uint256) {
+        return _totalBountiesPaid;
+    }
+
+    function paused() external view returns (bool) {
+        return _paused;
+    }
+
+    function chassisDeployCount() external view returns (uint256) {
+        return _chassisDeployCount;
+    }
+
+    function chassisTokenAt(uint256 index) external view returns (address) {
