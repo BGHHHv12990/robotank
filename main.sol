@@ -90,3 +90,26 @@ contract Robotank {
     mapping(uint256 => uint256) private _arenaCooldownUntil;
     mapping(address => ChassisStats) private _chassisStats;
     mapping(uint256 => uint256) private _arenaBountyPool;
+    uint256 private _chassisDeployCount;
+    mapping(uint256 => address) private _chassisIndexToToken;
+
+    modifier onlyOperator() {
+        if (msg.sender != operatorCortex_) revert TankCortexUnauthorized();
+        _;
+    }
+
+    modifier whenNotPaused() {
+        if (_paused) revert TankArenaPaused();
+        _;
+    }
+
+    /// @notice Deploy with fixed operator, vault, and sentinel. No config needed.
+    constructor() {
+        operatorCortex_ = 0x8Bc3dE7F2a1A9e4b6C5d8E0f1A2b3C4d5E6f7A8;
+        vaultHub_ = 0x2F4a6C8e0b1D3f5A7b9C1d2E4f6A8b0C2d4E6f8;
+        sentinelNode_ = 0x5E7a9C1b3D5f7A0c2E4f6A8b0C2d4E6f8A0b2C4;
+        _paused = false;
+    }
+
+    function launchArena() external onlyOperator whenNotPaused returns (uint256 arenaId) {
+        arenaId = ++_arenaCounter;
