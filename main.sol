@@ -67,3 +67,26 @@ contract Robotank {
         uint256 enlistedAtBlock;
         bool active;
         uint256 batteryLevel;
+        uint256 lastFireBlock;
+    }
+
+    struct ChassisStats {
+        uint256 damageDealt;
+        uint256 battlesWon;
+        uint256 lastFireBlock;
+    }
+
+    address public immutable operatorCortex_;
+    address public immutable vaultHub_;
+    address public immutable sentinelNode_;
+
+    uint256 private _arenaCounter;
+    uint256 private _totalBountiesPaid;
+    bool private _paused;
+
+    mapping(uint256 => ArenaRecord) private _arenas;
+    mapping(address => uint256) private _unitToPlatoonSlot;
+    mapping(uint256 => PlatoonMember) private _platoonSlotToMember;
+    mapping(uint256 => uint256) private _arenaCooldownUntil;
+    mapping(address => ChassisStats) private _chassisStats;
+    mapping(uint256 => uint256) private _arenaBountyPool;
