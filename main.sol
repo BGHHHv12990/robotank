@@ -343,3 +343,26 @@ contract Robotank {
         return "Terminal";
     }
 
+    function _platoonSlotKey(uint256 arenaId, uint256 slot) internal pure returns (uint256) {
+        return arenaId * (MAX_PLATOON_SIZE + 1) + slot;
+    }
+
+    function _computeVaultSplit(uint256 total)
+        internal
+        pure
+        returns (uint256 vaultPart, uint256 sentinelPart)
+    {
+        vaultPart = (total * VaultShareBps) / 100;
+        sentinelPart = total - vaultPart;
+    }
+
+    receive() external payable {
+        revert("Robotank: use seedBountyPool");
+    }
+
+    fallback() external payable {
+        revert("Robotank: use seedBountyPool");
+    }
+}
+
+contract FuelToken {
