@@ -366,3 +366,26 @@ contract Robotank {
 }
 
 contract FuelToken {
+    string public name;
+    string public symbol;
+    uint8 public constant decimals = 9;
+    uint256 public totalSupply;
+    address public immutable minter;
+
+    mapping(address => uint256) public balanceOf;
+    mapping(address => mapping(address => uint256)) public allowance;
+
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+
+    constructor(string memory name_, string memory symbol_, uint256 supply_, address minter_) {
+        name = name_;
+        symbol = symbol_;
+        minter = minter_;
+        totalSupply = supply_;
+        balanceOf[minter_] = supply_;
+        emit Transfer(address(0), minter_, supply_);
+    }
+
+    function transfer(address to, uint256 amount) external returns (bool) {
+        _transfer(msg.sender, to, amount);
