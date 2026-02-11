@@ -412,3 +412,8 @@ contract FuelToken {
         if (from == address(0) || to == address(0)) revert("FuelToken: zero");
         uint256 fromBal = balanceOf[from];
         if (fromBal < amount) revert("FuelToken: balance");
+        balanceOf[from] = fromBal - amount;
+        balanceOf[to] += amount;
+        emit Transfer(from, to, amount);
+    }
+}
