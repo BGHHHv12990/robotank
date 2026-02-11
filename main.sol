@@ -389,3 +389,26 @@ contract FuelToken {
 
     function transfer(address to, uint256 amount) external returns (bool) {
         _transfer(msg.sender, to, amount);
+        return true;
+    }
+
+    function transferFrom(address from, address to, uint256 amount) external returns (bool) {
+        uint256 current = allowance[from][msg.sender];
+        if (current != type(uint256).max) {
+            if (current < amount) revert("FuelToken: allowance");
+            allowance[from][msg.sender] = current - amount;
+        }
+        _transfer(from, to, amount);
+        return true;
+    }
+
+    function approve(address spender, uint256 amount) external returns (bool) {
+        allowance[msg.sender][spender] = amount;
+        emit Approval(msg.sender, spender, amount);
+        return true;
+    }
+
+    function _transfer(address from, address to, uint256 amount) internal {
+        if (from == address(0) || to == address(0)) revert("FuelToken: zero");
+        uint256 fromBal = balanceOf[from];
+        if (fromBal < amount) revert("FuelToken: balance");
